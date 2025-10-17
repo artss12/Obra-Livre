@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Obra Livre — Marketplace de Construção</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif;}
+body{background:#fff;color:#111;line-height:1.4;overflow-x:hidden;}
+header{background:#ffe600;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10;box-shadow:0 2px 6px rgba(0,0,0,.1);}
+.logo{font-weight:800;font-size:22px;color:#111;}
+.menu-btn{background:none;border:none;font-size:24px;cursor:pointer;}
+.nav-menu{display:none;position:absolute;top:60px;right:16px;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.2);border-radius:8px;flex-direction:column;width:200px;}
+.nav-menu button{padding:12px;cursor:pointer;border:none;background:none;text-align:left;width:100%;font-weight:600;border-bottom:1px solid #eee;}
+.nav-menu button:last-child{border-bottom:none;}
+.nav-menu.active{display:flex;}
+main{max-width:1200px;margin:auto;padding:16px;}
+#sectionTitle{margin-bottom:12px;font-size:20px;font-weight:700;}
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0;}
+.filters input,.filters select{padding:8px 10px;border:1px solid #ccc;border-radius:6px;flex:1;min-width:100px;font-size:14px;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;}
+.card{background:#fff;border-radius:10px;box-shadow:0 1px 6px rgba(0,0,0,.1);overflow:hidden;display:flex;flex-direction:column;cursor:pointer;transition:transform .2s ease;}
+.card:hover{transform:scale(1.02);}
+.card img{width:100%;height:140px;object-fit:contain;background:#f8f8f8;}
+.card-body{padding:10px;display:flex;flex-direction:column;flex:1;}
+.title{font-size:15px;font-weight:700;margin-bottom:4px;word-break:break-word;}
+.price{font-weight:800;color:#111;font-size:15px;margin:4px 0;}
+.donation{color:green;font-weight:700;font-size:15px;margin:4px 0;}
+.city{font-size:12px;color:#555;}
+.desc{font-size:13px;color:#333;margin:4px 0;flex:1;}
+.btn{background:#111;color:#fff;border:0;padding:8px 10px;border-radius:6px;cursor:pointer;font-weight:600;font-size:14px;}
+.btn.secondary{background:#ddd;color:#111;}
+.btn.small{padding:6px 8px;font-size:12px;}
+footer{background:#ffe600;text-align:center;padding:16px;margin-top:24px;font-weight:600;}
+footer p{margin:4px 0;}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:50;}
+.modal{background:#fff;padding:20px;border-radius:10px;max-width:500px;width:90%;max-height:90vh;overflow:auto;position:relative;}
+.form-group{margin-bottom:12px;}
+label{display:block;font-size:14px;margin-bottom:4px;}
+input,textarea,select{width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;font-size:14px;}
+textarea{min-height:70px;}
+.preview-img{width:100%;max-height:180px;object-fit:contain;margin-top:8px;border:1px solid #ddd;border-radius:6px;}
+.char-count{font-size:12px;color:#666;text-align:right;margin-top:2px;}
+#viewAd{display:none;padding:16px;}
+#viewAd img{width:100%;max-height:300px;object-fit:contain;border-radius:10px;background:#f8f8f8;}
+#viewAd h2{margin:10px 0;}
+#viewAd p{margin:6px 0;}
+#viewAd .back-btn{margin-bottom:12px;}
+@media(max-width:600px){
+  .filters{flex-direction:column;}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;}
+  .card img{height:120px;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🏗️ Obra Livre</div>
+  <button class="menu-btn" id="menuBtn">☰</button>
+  <div class="nav-menu" id="navMenu">
+    <button id="btnMyAds">📦 Meus Anúncios</button>
+    <button id="btnAdd">+ Anunciar</button>
+    <!-- Novo botão de cadastro -->
+    <button id="btnSignup">📝 Cadastrar</button>
+    <button id="btnLogin">🔑 Login</button>
+    <button id="btnLogout" style="display:none;">🚪 Sair</button>
+  </div>
+</header>
+
+<main id="mainSection">
+  <div class="filters">
+    <input id="searchInput" type="text" placeholder="🔍 Buscar produto...">
+    <select id="stateFilter">
+      <option value="">Todos os estados</option>
+      <option>AC</option><option>AL</option><option>AP</option><option>AM</option><option>BA</option>
+      <option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option>
+      <option>MT</option><option>MS</option><option>MG</option><option>PA</option><option>PB</option>
+      <option>PR</option><option>PE</option><option>PI</option><option>RJ</option><option>RN</option>
+      <option>RS</option><option>RO</option><option>RR</option><option>SC</option><option>SP</option>
+      <option>SE</option><option>TO</option>
+    </select>
+    <select id="categoryFilter">
+      <option value="">Todas as categorias</option>
+      <option value="nicho">Nicho</option>
+      <option value="bancada">Bancada</option>
+      <option value="ferramentas">Ferramentas</option>
+      <option value="eletrica">Elétrica</option>
+      <option value="pisos">Pisos</option>
+      <option value="moveis">Móveis</option>
+      <option value="torneiras">Torneiras</option>
+      <option value="cubas">Cubas</option>
+      <option value="outros">Outros</option>
+    </select>
+  </div>
+  <h2 id="sectionTitle">Todos os Produtos</h2>
+  <div id="grid" class="grid"></div>
+  <p id="empty" style="color:#666;text-align:center;margin-top:20px;display:none;">Nenhum produto encontrado.</p>
+</main>
+
+<section id="viewAd">
+  <button class="btn small back-btn">⬅️ Voltar</button>
+  <div id="viewContent"></div>
+</section>
+
+<footer>
+  <p>🚀 Obra Livre — Marketplace de materiais de construção</p>
+  <p>💛 Apoie via PIX: <b>arthurantune01@gmail.com</b></p>
+</footer>
+
+<!-- Modal Adicionar -->
+<div id="modalBg" class="modal-bg">
+  <div class="modal">
+    <button class="btn small secondary" id="btnCloseModal" style="position:absolute;top:10px;right:10px;">✖</button>
+    <h2 id="formTitle">Novo Anúncio</h2>
+    <form id="formAdd">
+      <div class="form-group">
+        <label>Título</label>
+        <input name="titulo" maxlength="40" required>
+        <div class="char-count" id="tituloCount">0/40</div>
+      </div>
+      <div class="form-group">
+        <label>Descrição</label>
+        <textarea name="descricao" maxlength="200" required></textarea>
+        <div class="char-count" id="descCount">0/200</div>
+      </div>
+      <div class="form-group"><label>Preço (0 para doação)</label><input name="preco" type="number" step="0.01" required></div>
+      <div class="form-group"><label>Tipo</label><select name="tipo" required><option value="venda">Venda</option><option value="doacao">Doação</option></select></div>
+      <div class="form-group"><label>Categoria</label>
+        <select name="categoria" required>
+          <option value="">Selecione...</option><option value="nicho">Nicho</option><option value="bancada">Bancada</option>
+          <option value="ferramentas">Ferramentas</option><option value="eletrica">Elétrica</option><option value="pisos">Pisos</option>
+          <option value="moveis">Móveis</option><option value="torneiras">Torneiras</option><option value="cubas">Cubas</option><option value="outros">Outros</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Estado</label><select name="estado" required><option value="">Selecione...</option>
+        <option>AC</option><option>AL</option><option>AP</option><option>AM</option><option>BA</option><option>CE</option><option>DF</option><option>ES</option>
+        <option>GO</option><option>MA</option><option>MT</option><option>MS</option><option>MG</option><option>PA</option><option>PB</option><option>PR</option>
+        <option>PE</option><option>PI</option><option>RJ</option><option>RN</option><option>RS</option><option>RO</option><option>RR</option><option>SC</option>
+        <option>SP</option><option>SE</option><option>TO</option>
+      </select></div>
+      <div class="form-group"><label>Cidade</label><input name="cidade" required></div>
+      <div class="form-group"><label>Contato (WhatsApp)</label><input name="contato" required placeholder="ex: 5591999123456"></div>
+      <div class="form-group">
+        <label>Imagem (opcional)</label>
+        <input type="file" name="imagem" accept="image/*">
+        <img id="imgPreview" class="preview-img" style="display:none;">
+      </div>
+      <button class="btn" type="submit">📤 Publicar</button>
+    </form>
+  </div>
+</div>
+
+<!-- Firebase + Supabase -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const firebaseConfig={apiKey:"AIzaSyBFdXdiqKsV2r_dWXAUDkU8NxSOLhsqEww",authDomain:"obralivrebr-8f827.firebaseapp.com",projectId:"obralivrebr-8f827",storageBucket:"obralivrebr-8f827.firebasestorage.app",messagingSenderId:"791646299173",appId:"1:791646299173:web:7c90dde705fe23d6c48bcc"};
+const app=initializeApp(firebaseConfig); 
+const db=getFirestore(app);
+
+const SUPABASE_URL="https://iawwepwacuzlztbhaymn.supabase.co";
+const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlhd3dlcHdhY3V6bHp0YmhheW1uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA2MzAzODMsImV4cCI6MjA3NjIwNjM4M30.uH475zAlrOrIlv8CkMbP1mnK1P_CfRtHsWgLSTrT2DU";
+const supabase=createClient(SUPABASE_URL,SUPABASE_KEY);
+const SUPABASE_BUCKET='imagens';
+
+const grid=document.getElementById('grid');
+const emptyMsg=document.getElementById('empty');
+const formAdd=document.getElementById('formAdd');
+const modalBg=document.getElementById('modalBg');
+const btnAdd=document.getElementById('btnAdd');
+const btnMyAds=document.getElementById('btnMyAds');
+const sectionTitle=document.getElementById('sectionTitle');
+const searchInput=document.getElementById('searchInput');
+const stateFilter=document.getElementById('stateFilter');
+const categoryFilter=document.getElementById('categoryFilter');
+const menuBtn=document.getElementById('menuBtn');
+const navMenu=document.getElementById('navMenu');
+const btnLogin=document.getElementById('btnLogin');
+const btnLogout=document.getElementById('btnLogout');
+const btnSignup=document.getElementById('btnSignup');
+const btnCloseModal=document.getElementById('btnCloseModal');
+const tituloInput=formAdd.querySelector('input[name="titulo"]');
+const descInput=formAdd.querySelector('textarea[name="descricao"]');
+const tituloCount=document.getElementById('tituloCount');
+const descCount=document.getElementById('descCount');
+const imgInput=formAdd.querySelector('input[name="imagem"]');
+const imgPreview=document.getElementById('imgPreview');
+const viewAd=document.getElementById('viewAd');
+const viewContent=document.getElementById('viewContent');
+const backBtn=viewAd.querySelector('.back-btn');
+const mainSection=document.getElementById('mainSection');
+
+let anuncios=[],modoMeusAnuncios=false,editandoId=null,originalImage=null,user=null;
+
+// Menu toggle
+menuBtn.onclick=()=>navMenu.classList.toggle('active');
+
+// Contadores e preview
+tituloInput.oninput=()=>tituloCount.textContent=`${tituloInput.value.length}/40`;
+descInput.oninput=()=>descCount.textContent=`${descInput.value.length}/200`;
+imgInput.onchange=()=>{const f=imgInput.files[0];if(f){const r=new FileReader();r.onload=e=>{imgPreview.src=e.target.result;imgPreview.style.display='block';};r.readAsDataURL(f);}else imgPreview.style.display='none';};
+btnCloseModal.onclick=()=>modalBg.style.display='none';
+
+// Upload imagem
+async function uploadImageToSupabase(file){
+ const safeName=`${Date.now()}-${Math.random().toString(36).slice(2)}-${file.name.replace(/\s+/g,'_')}`;
+ const {data,error}=await supabase.storage.from(SUPABASE_BUCKET).upload(safeName,file,{upsert:true});
+ if(error)throw error; const {data:urlData}=supabase.storage.from(SUPABASE_BUCKET).getPublicUrl(safeName); return urlData.publicUrl;
+}
+
+// Abrir modal
+btnAdd.onclick=()=>{if(!user)return alert('🔑 Faça login primeiro!');formAdd.reset();editandoId=null;originalImage=null;imgPreview.style.display='none';modalBg.style.display='flex';};
+
+// Carregar anúncios
+async function carregarAnuncios(){
+  grid.innerHTML='';
+  const snap=await getDocs(collection(db,"anuncios"));
+  anuncios=snap.docs.map(d=>({id:d.id,...d.data()}));
+  filtrarAnuncios();
+}
+
+// Renderizar anúncios
+function filtrarAnuncios(){
+ grid.innerHTML='';
+ const filtroEstado=(stateFilter.value||'').toLowerCase(),
+       filtroCat=(categoryFilter.value||'').toLowerCase(),
+       busca=(searchInput.value||'').toLowerCase();
+ const res=anuncios.filter(a=>{
+   if(modoMeusAnuncios&&user&&a.user_id!==user.id)return false;
+   if(filtroEstado&&a.estado?.toLowerCase()!==filtroEstado)return false;
+   if(filtroCat&&a.categoria?.toLowerCase()!==filtroCat)return false;
+   if(busca&&!`${a.titulo} ${a.descricao}`.toLowerCase().includes(busca))return false;
+   return true;
+ });
+ if(!res.length){emptyMsg.style.display='block';return;}emptyMsg.style.display='none';
+ res.forEach(a=>{
+   const card=document.createElement('div');card.className='card';
+   card.innerHTML=`<img src="${a.imagem||''}" alt="">
+     <div class="card-body">
+       <div class="title">${a.titulo}</div>
+       <div class="${a.tipo==='doacao'?'donation':'price'}">${a.tipo==='doacao'?'💚 Doação':`R$ ${a.preco}`}</div>
+       <div class="city">${a.cidade} - ${a.estado}</div>
+       <div class="desc">${a.descricao.substring(0,80)}...</div>
+     </div>`;
+   grid.appendChild(card);
+   card.onclick=()=>abrirVisualizacao(a);
+ });
+}
+
+// Visualizar anúncio
+function abrirVisualizacao(a){
+ mainSection.style.display='none';
+ viewAd.style.display='block';
+ const botoesDono = (user && a.user_id === user.id && modoMeusAnuncios)
+   ? `<div style="margin-top:10px;">
+        <button
+        <button class="btn small secondary" onclick="abrirEdicaoPorId('${a.id}')">✏️ Editar</button>
+        <button class="btn small secondary" onclick="excluirAnuncio('${a.id}')">🗑️ Excluir</button>
+      </div>` 
+   : '';
+
+ viewContent.innerHTML=`
+    <img src="${a.imagem || ''}" alt="">
+    <h2>${a.titulo}</h2>
+    <p><strong>${a.tipo === 'doacao' ? '💚 Doação' : '💰 R$ ' + a.preco}</strong></p>
+    <p>${a.descricao}</p>
+    <p>📍 ${a.cidade} - ${a.estado}</p>
+    <p>🏷️ ${a.categoria}</p>
+    <p><button class="btn" onclick="window.open('https://wa.me/${a.contato}?text=Olá!%20Tenho%20interesse%20no%20seu%20anúncio%20de%20${encodeURIComponent(a.titulo)}','_blank')">💬 Entrar em contato</button></p>
+    ${botoesDono}
+ `;
+}
+
+// Voltar da página individual
+backBtn.onclick = () => {
+  viewAd.style.display = 'none';
+  mainSection.style.display = 'block';
+};
+
+// Abrir edição por ID
+window.abrirEdicaoPorId = (id) => {
+  const anuncio = anuncios.find(a => a.id === id);
+  if (anuncio) abrirEdicao(anuncio);
+};
+
+// Abrir edição
+function abrirEdicao(a) {
+  if (!user || a.user_id !== user.id) return alert('Você só pode editar seus anúncios.');
+  const campos = ['titulo', 'descricao', 'preco', 'tipo', 'categoria', 'estado', 'cidade', 'contato'];
+  campos.forEach(name => formAdd[name].value = a[name] ?? '');
+  originalImage = a.imagem || null;
+  editandoId = a.id;
+  document.getElementById('formTitle').textContent = "Editar Anúncio";
+  modalBg.style.display = 'flex';
+}
+
+// Excluir
+async function excluirAnuncio(id) {
+  if (!confirm('🗑️ Deseja realmente excluir este anúncio?')) return;
+  await deleteDoc(doc(db, "anuncios", id));
+  alert('✅ Anúncio excluído!');
+  viewAd.style.display = 'none';
+  mainSection.style.display = 'block';
+  carregarAnuncios();
+}
+
+// Salvar anúncio (novo ou edição)
+formAdd.onsubmit = async (e) => {
+  e.preventDefault();
+  if (!user) return alert('🔑 Faça login primeiro!');
+  const fd = new FormData(formAdd);
+  const novo = Object.fromEntries(fd.entries());
+  novo.user_id = user.id;
+  const file = formAdd.imagem.files[0];
+
+  const persistir = async (imgUrl) => {
+    if (imgUrl) novo.imagem = imgUrl;
+    else if (editandoId && originalImage) novo.imagem = originalImage;
+    if (editandoId) await updateDoc(doc(db, "anuncios", editandoId), novo);
+    else await addDoc(collection(db, "anuncios"), novo);
+    alert('✅ Anúncio salvo com sucesso!');
+    modalBg.style.display = 'none';
+    editandoId = null;
+    originalImage = null;
+    formAdd.reset();
+    imgPreview.style.display = 'none';
+    carregarAnuncios();
+  };
+
+  if (file) {
+    try {
+      const url = await uploadImageToSupabase(file);
+      await persistir(url);
+    } catch (err) {
+      alert('Erro ao enviar imagem');
+      console.error(err);
+    }
+  } else {
+    await persistir(null);
+  }
+};
+
+// Filtros, busca e "Meus Anúncios"
+searchInput.oninput = filtrarAnuncios;
+stateFilter.onchange = filtrarAnuncios;
+categoryFilter.onchange = filtrarAnuncios;
+
+btnMyAds.onclick = () => {
+  if (!user) return alert('🔑 Faça login primeiro!');
+  modoMeusAnuncios = !modoMeusAnuncios;
+  sectionTitle.textContent = modoMeusAnuncios ? '📦 Meus Anúncios' : 'Todos os Produtos';
+  btnMyAds.textContent = modoMeusAnuncios ? '⬅️ Voltar' : '📦 Meus Anúncios';
+  filtrarAnuncios();
+};
+
+// Login
+btnLogin.onclick = async () => {
+  const email = prompt('Digite seu e-mail:');
+  const password = prompt('Digite sua senha:');
+  if (!email || !password) return;
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) return alert('Erro ao logar: ' + error.message);
+  user = data.user;
+  btnLogin.style.display = 'none';
+  btnLogout.style.display = 'block';
+  carregarAnuncios();
+  alert('✅ Login realizado!');
+};
+
+// Logout
+btnLogout.onclick = async () => {
+  await supabase.auth.signOut();
+  user = null;
+  modoMeusAnuncios = false;
+  btnLogin.style.display = 'block';
+  btnLogout.style.display = 'none';
+  sectionTitle.textContent = 'Todos os Produtos';
+  btnMyAds.textContent = '📦 Meus Anúncios';
+  carregarAnuncios();
+  alert('👋 Logout feito!');
+};
+
+// Cadastro
+btnSignup.onclick = async () => {
+  const email = prompt('Digite seu e-mail:');
+  const password = prompt('Crie uma senha:');
+  if (!email || !password) return;
+  const { data, error } = await supabase.auth.signUp({ email, password });
+  if (error) return alert('Erro ao cadastrar: ' + error.message);
+  alert('✅ Cadastro realizado! Faça login para continuar.');
+};
+
+// Inicialização
+carregarAnuncios();
+</script>
+</body>
+</html>
